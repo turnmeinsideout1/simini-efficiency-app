@@ -1,0 +1,135 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Auth & Tenancy ──────────────────────────────────────────────────────────
+
+model Practice {
+  id             String           @id @default(cuid())
+  name           String           @unique
+  passwordHash   String
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  users          User[]
+  surgeons       Surgeon[]
+  surgicalDays   SurgicalDay[]
+  referringClinics ReferringClinic[]
+}
+
+model User {
+  id          String    @id @default(cuid())
+  supabaseId  String    @unique
+  email       String    @unique
+  name        String
+  role        UserRole  @default(STAFF)
+  practiceId  String
+  practice    Practice  @relation(fields: [practiceId], references: [id])
+  surgeonId   String?   @unique
+  surgeon     Surgeon?  @relation("UserSurgeon", fields: [surgeonId], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+enum UserRole {
+  SURGEON
+  STAFF
+}
+
+// ─── Practice Data ───────────────────────────────────────────────────────────
+
+model Surgeon {
+  id           String        @id @default(cuid())
+  name         String
+  color        String?       // pastel color key e.g. "blue", "green"
+  isActive     Boolean       @default(true)
+  practiceId   String
+  practice     Practice      @relation(fields: [practiceId], references: [id])
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  primaryDays  SurgicalDay[] @relation("PrimarySurgeon")
+  surgeryCases SurgeryCase[]
+  userAccount  User?         @relation("UserSurgeon")
+}
+
+model SurgicalDay {
+  id                  String        @id @default(cuid())
+  date                DateTime      @db.Date
+  practiceId          String
+  practice            Practice      @relation(fields: [practiceId], references: [id])
+  primarySurgeonId    String
+  primarySurgeon      Surgeon       @relation("PrimarySurgeon", fields: [primarySurgeonId], references: [id])
+  hqDepartureTime     DateTime?
+  hqReturnArrivalTime DateTime?
+  notes               String?
+  clinicVisits        ClinicVisit[]
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+}
+
+model ClinicVisit {
+  id               String        @id @default(cuid())
+  surgicalDayId    String
+  surgicalDay      SurgicalDay   @relation(fields: [surgicalDayId], references: [id], onDelete: Cascade)
+  clinicName       String
+  arrivalTime      DateTime?
+  readyToLeaveTime DateTime?
+  order            Int           @default(0)
+  surgeryCases     SurgeryCase[]
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+}
+
+model SurgeryCase {
+  id                String          @id @default(cuid())
+  clinicVisitId     String
+  clinicVisit       ClinicVisit     @relation(fields: [clinicVisitId], references: [id], onDelete: Cascade)
+  surgeonId         String
+  surgeon           Surgeon         @relation(fields: [surgeonId], references: [id])
+  patientName       String
+  patientWeight     Float?
+  numTechnicians    Int             @default(1)
+  surgeryCategory   SurgeryCategory
+  surgeryType       String
+  incisionStartTime DateTime?
+  endOfSutureTime   DateTime?
+  readyTime         DateTime?
+  notes             String?
+  order             Int             @default(0)
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+}
+
+enum SurgeryCategory {
+  ORTHOPEDIC
+  SOFT_TISSUE
+}
+
+model ReferringClinic {
+  id         String   @id @default(cuid())
+  name       String
+  practiceId String
+  practice   Practice @relation(fields: [practiceId], references: [id], onDelete: Cascade)
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([name, practiceId])
+}
+
+// ─── Global Reference Data ───────────────────────────────────────────────────
+
+model SurgeryType {
+  id        String          @id @default(cuid())
+  name      String
+  category  SurgeryCategory
+  isActive  Boolean         @default(true)
+  sortOrder Int             @default(0)
+  createdAt DateTime        @default(now())
+
+  @@unique([name, category])
+}
