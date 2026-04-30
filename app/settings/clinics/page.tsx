@@ -5,6 +5,7 @@ import { requireUser } from "@/lib/auth";
 import { getReferringClinics, createReferringClinic, updateReferringClinic, deleteReferringClinic, importClinicsFromCsv } from "@/lib/actions/referring-clinics";
 import DeleteButton from "@/components/ui/DeleteButton";
 import CsvUpload from "@/components/settings/CsvUpload";
+import SubmitButton from "@/components/ui/SubmitButton";
 
 interface Props {
   searchParams: Promise<{ onboarding?: string }>;
@@ -41,7 +42,7 @@ export default async function ClinicsPage({ searchParams }: Props) {
         <h2 className="text-sm font-semibold text-slate-700 mb-3">Add Clinic</h2>
         <form action={createReferringClinic} className="flex gap-3">
           <input name="name" type="text" placeholder="Clinic name…" required className="form-input flex-1" />
-          <button type="submit" className="btn-primary shrink-0">Add</button>
+          <SubmitButton label="Add" pendingLabel="Adding…" className="btn-primary shrink-0" />
         </form>
       </div>
 
@@ -51,6 +52,13 @@ export default async function ClinicsPage({ searchParams }: Props) {
         <p className="text-xs text-slate-400 mb-3">One clinic name per row. Header row is ignored.</p>
         <CsvUpload action={importClinicsFromCsv} />
       </div>
+
+      {/* Onboarding: quick-finish when clinics already exist */}
+      {isOnboarding && clinics.length > 0 && (
+        <Link href="/" className="btn-primary w-full text-center block">
+          Done — Start Using the App →
+        </Link>
+      )}
 
       {/* Clinic list */}
       <div className="card divide-y divide-slate-100">

@@ -5,6 +5,7 @@ import { requireUser } from "@/lib/auth";
 import { createSurgeon, updateSurgeon, deleteSurgeon, getSurgeons } from "@/lib/actions/surgeons";
 import DeleteButton from "@/components/ui/DeleteButton";
 import ColorPicker from "@/components/settings/ColorPicker";
+import SubmitButton from "@/components/ui/SubmitButton";
 
 interface Props {
   searchParams: Promise<{ onboarding?: string }>;
@@ -40,7 +41,7 @@ export default async function SurgeonsPage({ searchParams }: Props) {
           {isOnboarding && <input type="hidden" name="onboarding" value="1" />}
           <input name="name" type="text" placeholder="Full name…" required className="form-input" />
           <ColorPicker name="color" selected={null} />
-          <button type="submit" className="btn-primary w-full">Add Surgeon</button>
+          <SubmitButton label="Add Surgeon" pendingLabel="Adding…" className="btn-primary w-full" />
         </form>
       </div>
 
