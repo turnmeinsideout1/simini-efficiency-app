@@ -33,7 +33,20 @@ export default function SurgeryCaseForm({
   );
   const [error, setError] = useState<string | null>(null);
 
+  // Initialise tech count from the saved case, or from the pre-selected surgeon's default
+  const initialSurgeonId = surgeryCase?.surgeonId ?? defaultSurgeonId ?? "";
+  const initialTechs =
+    surgeryCase?.numTechnicians ??
+    surgeons.find((s) => s.id === initialSurgeonId)?.defaultTechnicians ??
+    1;
+  const [numTechs, setNumTechs] = useState<number>(initialTechs);
+
   const filteredTypes = surgeryTypes.filter((t) => t.category === category);
+
+  function handleSurgeonChange(e: React.ChangeEvent<HTMLSelectElement>) {
+    const surgeon = surgeons.find((s) => s.id === e.target.value);
+    if (surgeon) setNumTechs(surgeon.defaultTechnicians ?? 1);
+  }
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -63,7 +76,7 @@ export default function SurgeryCaseForm({
           )}
         </div>
         <div className="grid grid-cols-2 gap-4">
-          <div className="col-span-2">
+          <div>
             <label className="form-label" htmlFor="patientName">Patient Name</label>
             <input id="patientName" name="patientName" type="text" defaultValue={surgeryCase?.patientName ?? ""} placeholder="e.g. Max" required className="form-input" />
           </div>
@@ -71,9 +84,39 @@ export default function SurgeryCaseForm({
             <label className="form-label" htmlFor="patientWeight">Weight (lbs)</label>
             <input id="patientWeight" name="patientWeight" type="number" step="0.1" min="0" defaultValue={surgeryCase?.patientWeight ?? ""} placeholder="e.g. 62" className="form-input" />
           </div>
+        </div>
+      </div>
+
+      {/* Staff */}
+      <div className="space-y-4">
+        <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">Staff</h3>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="form-label" htmlFor="surgeonId">Surgeon</label>
+            <select
+              id="surgeonId"
+              name="surgeonId"
+              defaultValue={initialSurgeonId}
+              required
+              className="form-select"
+              onChange={handleSurgeonChange}
+            >
+              <option value="" disabled>Select surgeon…</option>
+              {surgeons.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+            </select>
+          </div>
           <div>
             <label className="form-label" htmlFor="numTechnicians">Technicians</label>
-            <input id="numTechnicians" name="numTechnicians" type="number" min="0" max="10" defaultValue={surgeryCase?.numTechnicians ?? 1} className="form-input" />
+            <input
+              id="numTechnicians"
+              name="numTechnicians"
+              type="number"
+              min="0"
+              max="10"
+              value={numTechs}
+              onChange={(e) => setNumTechs(Number(e.target.value))}
+              className="form-input"
+            />
           </div>
         </div>
       </div>
@@ -81,20 +124,18 @@ export default function SurgeryCaseForm({
       {/* Surgery */}
       <div className="space-y-4">
         <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">Surgery</h3>
-
-        <div>
-          <label className="form-label" htmlFor="surgeonId">Surgeon</label>
-          <select id="surgeonId" name="surgeonId" defaultValue={surgeryCase?.surgeonId ?? defaultSurgeonId ?? ""} required className="form-select">
-            <option value="" disabled>Select surgeon…</option>
-            {surgeons.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
-          </select>
-        </div>
-
         <div>
           <label className="form-label">Category</label>
           <div className="grid grid-cols-2 gap-3">
             {(["ORTHOPEDIC", "SOFT_TISSUE"] as const).map((cat) => (
-              <label key={cat} className={`flex items-center gap-2 cursor-pointer rounded-lg border px-3 py-2.5 transition-colors ${category === cat ? (cat === "ORTHOPEDIC" ? "border-blue-500 bg-blue-50" : "border-emerald-500 bg-emerald-50") : "border-slate-300"}`}>
+              <label
+                key={cat}
+                className={`flex items-center gap-2 cursor-pointer rounded-lg border px-3 py-2.5 transition-colors ${
+                  category === cat
+                    ? cat === "ORTHOPEDIC" ? "border-blue-500 bg-blue-50" : "border-emerald-500 bg-emerald-50"
+                    : "border-slate-300"
+                }`}
+              >
                 <input
                   type="radio"
                   name="surgeryCategory"
@@ -110,7 +151,6 @@ export default function SurgeryCaseForm({
             ))}
           </div>
         </div>
-
         <div>
           <label className="form-label" htmlFor="surgeryType">Surgery Type</label>
           <select

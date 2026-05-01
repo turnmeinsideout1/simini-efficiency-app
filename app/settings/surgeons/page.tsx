@@ -39,7 +39,16 @@ export default async function SurgeonsPage({ searchParams }: Props) {
         <h2 className="text-sm font-semibold text-slate-700">Add Surgeon</h2>
         <form action={createSurgeon} className="space-y-3">
           {isOnboarding && <input type="hidden" name="onboarding" value="1" />}
-          <input name="name" type="text" placeholder="Full name…" required className="form-input" />
+          <div className="grid grid-cols-3 gap-3">
+            <div className="col-span-2">
+              <label className="form-label" htmlFor="add-name">Name</label>
+              <input id="add-name" name="name" type="text" placeholder="Full name…" required className="form-input" />
+            </div>
+            <div>
+              <label className="form-label" htmlFor="add-defaultTechnicians">Default Techs</label>
+              <input id="add-defaultTechnicians" name="defaultTechnicians" type="number" min="0" max="10" defaultValue={1} className="form-input" />
+            </div>
+          </div>
           <ColorPicker name="color" selected={null} />
           <SubmitButton label="Add Surgeon" pendingLabel="Adding…" className="btn-primary w-full" />
         </form>
@@ -58,17 +67,26 @@ export default async function SurgeonsPage({ searchParams }: Props) {
             return (
               <div key={surgeon.id} className="p-4 space-y-3">
                 <form action={updateAction} className="space-y-3">
-                  <div className="flex gap-2 items-center">
-                    <input name="name" type="text" defaultValue={surgeon.name} className="form-input flex-1 text-sm" />
-                    <button type="submit" className="btn-secondary text-xs shrink-0">Save</button>
+                  <div className="grid grid-cols-3 gap-2 items-end">
+                    <div className="col-span-2">
+                      <label className="form-label text-xs">Name</label>
+                      <input name="name" type="text" defaultValue={surgeon.name} className="form-input text-sm" />
+                    </div>
+                    <div>
+                      <label className="form-label text-xs">Default Techs</label>
+                      <input name="defaultTechnicians" type="number" min="0" max="10" defaultValue={surgeon.defaultTechnicians} className="form-input text-sm" />
+                    </div>
+                  </div>
+                  <ColorPicker name="color" selected={surgeon.color} />
+                  <div className="flex gap-2">
+                    <button type="submit" className="btn-secondary text-xs">Save</button>
                     <DeleteButton
                       action={deleteAction}
                       confirm={`Remove ${surgeon.name}?`}
-                      className="btn-ghost text-xs text-red-500 hover:text-red-700 hover:bg-red-50 shrink-0"
+                      className="btn-ghost text-xs text-red-500 hover:text-red-700 hover:bg-red-50"
                       label="Remove"
                     />
                   </div>
-                  <ColorPicker name="color" selected={surgeon.color} />
                 </form>
               </div>
             );

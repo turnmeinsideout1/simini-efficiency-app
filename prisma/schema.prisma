@@ -44,10 +44,11 @@ enum UserRole {
 // ─── Practice Data ───────────────────────────────────────────────────────────
 
 model Surgeon {
-  id           String        @id @default(cuid())
-  name         String
-  color        String?       // pastel color key e.g. "blue", "green"
-  isActive     Boolean       @default(true)
+  id                  String        @id @default(cuid())
+  name                String
+  color               String?       // pastel color key e.g. "blue", "green"
+  defaultTechnicians  Int           @default(1)
+  isActive            Boolean       @default(true)
   practiceId   String
   practice     Practice      @relation(fields: [practiceId], references: [id])
   createdAt    DateTime      @default(now())

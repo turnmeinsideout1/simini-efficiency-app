@@ -9,6 +9,7 @@ import { requireUser } from "@/lib/auth";
 const SurgeonSchema = z.object({
   name: z.string().min(1, "Name is required").max(100),
   color: z.string().optional(),
+  defaultTechnicians: z.coerce.number().int().min(0).max(10).default(1),
 });
 
 export async function createSurgeon(formData: FormData) {
@@ -16,11 +17,17 @@ export async function createSurgeon(formData: FormData) {
   const parsed = SurgeonSchema.safeParse({
     name: formData.get("name"),
     color: formData.get("color") || undefined,
+    defaultTechnicians: formData.get("defaultTechnicians") || 1,
   });
   if (!parsed.success) throw new Error(parsed.error.errors[0].message);
 
   await prisma.surgeon.create({
-    data: { name: parsed.data.name, color: parsed.data.color ?? "blue", practiceId: user.practiceId },
+    data: {
+      name: parsed.data.name,
+      color: parsed.data.color ?? "blue",
+      defaultTechnicians: parsed.data.defaultTechnicians,
+      practiceId: user.practiceId,
+    },
   });
   revalidatePath("/settings/surgeons");
   const onboarding = formData.get("onboarding") === "1";
@@ -32,12 +39,13 @@ export async function updateSurgeon(id: string, formData: FormData) {
   const parsed = SurgeonSchema.safeParse({
     name: formData.get("name"),
     color: formData.get("color") || undefined,
+    defaultTechnicians: formData.get("defaultTechnicians") || 1,
   });
   if (!parsed.success) throw new Error(parsed.error.errors[0].message);
 
   await prisma.surgeon.update({
     where: { id, practiceId: user.practiceId },
-    data: { name: parsed.data.name, color: parsed.data.color ?? null },
+    data: { name: parsed.data.name, color: parsed.data.color ?? null, defaultTechnicians: parsed.data.defaultTechnicians },
   });
   revalidatePath("/settings/surgeons");
   redirect("/settings/surgeons");
