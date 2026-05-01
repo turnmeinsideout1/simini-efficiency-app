@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/auth";
 import { calcDayMetrics, type SurgicalDayWithRelations } from "@/lib/calculations";
-import { minutesBetween } from "@/lib/utils";
+import { minutesBetween, getTodayString } from "@/lib/utils";
 
 export interface SurgeonStats {
   surgeonId: string;
@@ -40,11 +40,9 @@ export interface DashboardStats {
 export async function getDashboardStats(period: number): Promise<DashboardStats> {
   const user = await requireUser();
 
-  const endDate = new Date();
-  endDate.setHours(23, 59, 59, 999);
-  const startDate = new Date();
-  startDate.setDate(startDate.getDate() - (period - 1));
-  startDate.setHours(0, 0, 0, 0);
+  const [ey, em, ed] = getTodayString().split("-").map(Number);
+  const endDate = new Date(ey, em - 1, ed, 23, 59, 59, 999);
+  const startDate = new Date(ey, em - 1, ed - (period - 1), 0, 0, 0, 0);
 
   const days = await prisma.surgicalDay.findMany({
     where: { practiceId: user.practiceId, date: { gte: startDate, lte: endDate } },

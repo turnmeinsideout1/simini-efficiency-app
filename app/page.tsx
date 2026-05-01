@@ -1,9 +1,10 @@
 export const dynamic = "force-dynamic";
 
 import Link from "next/link";
-import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, isToday, getDate } from "date-fns";
+import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, getDate } from "date-fns";
 import { getDaysForMonth } from "@/lib/actions/days";
 import { getSurgeonColor } from "@/lib/surgeon-colors";
+import { getTodayString } from "@/lib/utils";
 
 interface Props {
   searchParams: Promise<{ month?: string }>;
@@ -13,8 +14,8 @@ export default async function CalendarPage({ searchParams }: Props) {
   const { month } = await searchParams;
 
   // Determine the month to display
-  const now = new Date();
-  const currentYearMonth = month || format(now, "yyyy-MM");
+  const todayString = getTodayString(); // "yyyy-MM-dd" in Pacific time
+  const currentYearMonth = month || todayString.slice(0, 7);
   const [year, monthNum] = currentYearMonth.split("-").map(Number);
   const monthStart = new Date(year, monthNum - 1, 1);
 
@@ -70,7 +71,7 @@ export default async function CalendarPage({ searchParams }: Props) {
           {allDays.map((day, i) => {
             const dateKey = format(day, "yyyy-MM-dd");
             const inMonth = isSameMonth(day, monthStart);
-            const today = isToday(day);
+            const today = dateKey === todayString;
             const entries = dayMap.get(dateKey) || [];
             const hasActivity = entries.length > 0;
             const totalCases = entries.reduce(

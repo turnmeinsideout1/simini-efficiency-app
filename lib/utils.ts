@@ -35,6 +35,17 @@ function utcDateToLocal(dt: Date | string): Date {
   return new Date(year, month - 1, day);
 }
 
+/**
+ * Returns today's date string "yyyy-MM-dd" in US/Pacific time.
+ * Pacific is the westernmost continental US timezone, so this date
+ * never rolls over before any North American user's local midnight.
+ */
+export function getTodayString(): string {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Los_Angeles",
+  }).format(new Date());
+}
+
 /** Format minutes as "1h 23m" or "45m" */
 export function formatDuration(minutes: number | null | undefined): string {
   if (minutes == null || minutes < 0) return "—";
