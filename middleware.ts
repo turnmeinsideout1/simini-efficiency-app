@@ -45,6 +45,8 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
+  response.headers.set("x-pathname", request.nextUrl.pathname);
+  response.headers.set("x-search", request.nextUrl.search);
   return response;
 }
 

@@ -1,8 +1,16 @@
 import Link from "next/link";
+import { headers } from "next/headers";
 import { getCurrentUser } from "@/lib/auth";
 
 export default async function Header() {
   const user = await getCurrentUser();
+
+  const headersList = await headers();
+  const pathname = headersList.get("x-pathname") ?? "";
+  const search = headersList.get("x-search") ?? "";
+  const isOnboarding =
+    (pathname === "/settings/surgeons" || pathname === "/settings/clinics") &&
+    search.includes("onboarding=1");
 
   return (
     <header className="bg-white border-b border-slate-200 sticky top-0 z-10">
@@ -15,11 +23,15 @@ export default async function Header() {
         </Link>
 
         <nav className="flex items-center gap-1 overflow-x-auto">
-          <Link href="/" className="btn-ghost text-xs whitespace-nowrap">Calendar</Link>
-          <Link href="/days" className="btn-ghost text-xs whitespace-nowrap">Days</Link>
-          <Link href="/dashboard" className="btn-ghost text-xs whitespace-nowrap">Dashboard</Link>
-          <Link href="/settings/surgeons" className="btn-ghost text-xs whitespace-nowrap">Surgeons</Link>
-          <Link href="/settings/clinics" className="btn-ghost text-xs whitespace-nowrap">Clinics</Link>
+          {user && !isOnboarding && (
+            <>
+              <Link href="/" className="btn-ghost text-xs whitespace-nowrap">Calendar</Link>
+              <Link href="/days" className="btn-ghost text-xs whitespace-nowrap">Days</Link>
+              <Link href="/dashboard" className="btn-ghost text-xs whitespace-nowrap">Dashboard</Link>
+              <Link href="/settings/surgeons" className="btn-ghost text-xs whitespace-nowrap">Surgeons</Link>
+              <Link href="/settings/clinics" className="btn-ghost text-xs whitespace-nowrap">Clinics</Link>
+            </>
+          )}
           {user && (
             <Link
               href="/profile"

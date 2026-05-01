@@ -1,15 +1,19 @@
-import { format, parseISO } from "date-fns";
+import { format } from "date-fns";
 import { clsx, type ClassValue } from "clsx";
 
 export function cn(...inputs: ClassValue[]) {
   return clsx(inputs);
 }
 
-/** Format a Date or ISO string as "h:mm a" (e.g. "8:30 AM") */
+/** Format a Date or ISO string as "h:mm a" (e.g. "8:30 AM") — always reads UTC hours so it's correct in both server and browser environments. */
 export function formatTime(dt: Date | string | null | undefined): string {
   if (!dt) return "—";
-  const d = typeof dt === "string" ? parseISO(dt) : dt;
-  return format(d, "h:mm a");
+  const d = typeof dt === "string" ? new Date(dt) : dt;
+  const h = d.getUTCHours();
+  const m = d.getUTCMinutes();
+  const ampm = h >= 12 ? "PM" : "AM";
+  const h12 = h % 12 || 12;
+  return `${h12}:${m.toString().padStart(2, "0")} ${ampm}`;
 }
 
 /** Format a Date or ISO string as "MMM d, yyyy" (e.g. "Apr 28, 2026") */
@@ -75,8 +79,8 @@ export function combineDateAndTime(date: Date, timeStr: string): Date {
 export function toTimeInput(dt: Date | string | null | undefined): string {
   if (!dt) return "";
   const d = typeof dt === "string" ? new Date(dt) : dt;
-  const h = String(d.getHours()).padStart(2, "0");
-  const m = String(d.getMinutes()).padStart(2, "0");
+  const h = String(d.getUTCHours()).padStart(2, "0");
+  const m = String(d.getUTCMinutes()).padStart(2, "0");
   return `${h}:${m}`;
 }
 
