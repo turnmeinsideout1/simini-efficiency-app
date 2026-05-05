@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { getDashboardStats } from "@/lib/actions/stats";
 import { formatDuration, formatDate } from "@/lib/utils";
 import PeriodToggle from "@/components/dashboard/PeriodToggle";
+import ExportButton from "@/components/dashboard/ExportButton";
 
 interface Props {
   searchParams: Promise<{ period?: string }>;
@@ -27,9 +28,12 @@ export default async function DashboardPage({ searchParams }: Props) {
             {formatDate(stats.startDate)} – {formatDate(stats.endDate)}
           </p>
         </div>
-        <Suspense>
-          <PeriodToggle />
-        </Suspense>
+        <div className="flex items-center gap-2">
+          <ExportButton />
+          <Suspense>
+            <PeriodToggle />
+          </Suspense>
+        </div>
       </div>
 
       {noData ? (
