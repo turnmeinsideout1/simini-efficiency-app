@@ -49,6 +49,10 @@ export default async function SurgeonsPage({ searchParams }: Props) {
               <input id="add-defaultTechnicians" name="defaultTechnicians" type="number" min="0" max="10" defaultValue={1} className="form-input" />
             </div>
           </div>
+          <label className="flex items-center gap-2 cursor-pointer text-sm text-slate-700">
+            <input id="add-performsAnesthesia" name="performsAnesthesia" type="checkbox" className="rounded border-slate-300 text-brand-600" />
+            Performs anesthesia
+          </label>
           <ColorPicker name="color" selected={null} />
           <SubmitButton label="Add Surgeon" pendingLabel="Adding…" className="btn-primary w-full" />
         </form>
@@ -77,6 +81,10 @@ export default async function SurgeonsPage({ searchParams }: Props) {
                       <input name="defaultTechnicians" type="number" min="0" max="10" defaultValue={surgeon.defaultTechnicians} className="form-input text-sm" />
                     </div>
                   </div>
+                  <label className="flex items-center gap-2 cursor-pointer text-sm text-slate-700">
+                    <input name="performsAnesthesia" type="checkbox" defaultChecked={surgeon.performsAnesthesia} className="rounded border-slate-300 text-brand-600" />
+                    Performs anesthesia
+                  </label>
                   <ColorPicker name="color" selected={surgeon.color} />
                   <div className="flex gap-2">
                     <button type="submit" className="btn-secondary text-xs">Save</button>

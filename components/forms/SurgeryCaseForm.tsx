@@ -41,11 +41,20 @@ export default function SurgeryCaseForm({
     1;
   const [numTechs, setNumTechs] = useState<number>(initialTechs);
 
+  // Anesthesia: checked if the saved case has anesthesia times, else the selected surgeon's default
+  const initialAnesthesia = surgeryCase?.inductionTime || surgeryCase?.endOfAnesthesiaTime
+    ? true
+    : surgeons.find((s) => s.id === initialSurgeonId)?.performsAnesthesia ?? false;
+  const [anesthesia, setAnesthesia] = useState<boolean>(initialAnesthesia);
+
   const filteredTypes = surgeryTypes.filter((t) => t.category === category);
 
   function handleSurgeonChange(e: React.ChangeEvent<HTMLSelectElement>) {
     const surgeon = surgeons.find((s) => s.id === e.target.value);
-    if (surgeon) setNumTechs(surgeon.defaultTechnicians ?? 1);
+    if (surgeon) {
+      setNumTechs(surgeon.defaultTechnicians ?? 1);
+      setAnesthesia(surgeon.performsAnesthesia ?? false);
+    }
   }
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -170,8 +179,25 @@ export default function SurgeryCaseForm({
 
       {/* Times */}
       <div className="space-y-4">
-        <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">Times</h3>
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">Times</h3>
+          <label className="flex items-center gap-2 cursor-pointer text-sm text-slate-700">
+            <input
+              type="checkbox"
+              checked={anesthesia}
+              onChange={(e) => setAnesthesia(e.target.checked)}
+              className="rounded border-slate-300 text-brand-600"
+            />
+            Anesthesia
+          </label>
+        </div>
         <div className="grid grid-cols-2 gap-4">
+          {anesthesia && (
+            <div>
+              <label className="form-label" htmlFor="inductionTime">Induction</label>
+              <input id="inductionTime" name="inductionTime" type="time" defaultValue={surgeryCase?.inductionTime ? toTimeInput(surgeryCase.inductionTime) : ""} className="form-input" />
+            </div>
+          )}
           <div>
             <label className="form-label" htmlFor="incisionStartTime">Incision Start</label>
             <input id="incisionStartTime" name="incisionStartTime" type="time" defaultValue={surgeryCase?.incisionStartTime ? toTimeInput(surgeryCase.incisionStartTime) : ""} className="form-input" />
@@ -180,6 +206,12 @@ export default function SurgeryCaseForm({
             <label className="form-label" htmlFor="endOfSutureTime">End of Suture</label>
             <input id="endOfSutureTime" name="endOfSutureTime" type="time" defaultValue={surgeryCase?.endOfSutureTime ? toTimeInput(surgeryCase.endOfSutureTime) : ""} className="form-input" />
           </div>
+          {anesthesia && (
+            <div>
+              <label className="form-label" htmlFor="endOfAnesthesiaTime">End of Anesthesia</label>
+              <input id="endOfAnesthesiaTime" name="endOfAnesthesiaTime" type="time" defaultValue={surgeryCase?.endOfAnesthesiaTime ? toTimeInput(surgeryCase.endOfAnesthesiaTime) : ""} className="form-input" />
+            </div>
+          )}
           <div className="col-span-2">
             <label className="form-label" htmlFor="readyTime">
               Ready for Next / Leave

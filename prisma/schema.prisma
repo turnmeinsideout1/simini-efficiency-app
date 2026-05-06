@@ -48,6 +48,7 @@ model Surgeon {
   name                String
   color               String?       // pastel color key e.g. "blue", "green"
   defaultTechnicians  Int           @default(1)
+  performsAnesthesia  Boolean       @default(false)
   isActive            Boolean       @default(true)
   practiceId   String
   practice     Practice      @relation(fields: [practiceId], references: [id])
@@ -97,9 +98,11 @@ model SurgeryCase {
   numTechnicians    Int             @default(1)
   surgeryCategory   SurgeryCategory
   surgeryType       String
-  incisionStartTime DateTime?
-  endOfSutureTime   DateTime?
-  readyTime         DateTime?
+  inductionTime       DateTime?
+  incisionStartTime   DateTime?
+  endOfSutureTime     DateTime?
+  endOfAnesthesiaTime DateTime?
+  readyTime           DateTime?
   notes             String?
   order             Int             @default(0)
   createdAt         DateTime        @default(now())
